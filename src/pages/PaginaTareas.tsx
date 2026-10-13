@@ -7,6 +7,7 @@ import { ListaTareas } from "../components/ListaTareas";
 export function PaginaTareas(){
 
 const [tareas, setTareas] = useState<Tarea[]>([]);
+const [tareaEnEdicion, setTareaEnEdicion] = useState<Tarea| null>(null);
 
 const eliminarTarea = (id : string) => {
     setTareas(tareas.filter((tarea)=>tarea.id !== id));
@@ -19,7 +20,15 @@ const completarTarea = (id: string) => {
 };
 
 const editarTarea = (id: string) => {
-  console.log("Editar pendiente:", id);
+  const encontrada = tareas.find((tarea)=>tarea.id === id);
+  if (encontrada){
+    setTareaEnEdicion(encontrada)
+  }
+};
+
+const guardarEdicion = (id: string, datos: NuevaTarea) => {
+  setTareas(tareas.map((tarea) => tarea.id === id ? { ...tarea, ...datos } : tarea ));
+  setTareaEnEdicion(null);
 };
 
 const agregarTarea = (datos:NuevaTarea) =>{
@@ -36,7 +45,12 @@ const agregarTarea = (datos:NuevaTarea) =>{
 return(
     <div>
         <h1>Gestor de tareas</h1>
-        <FormularioTarea onAgregar={agregarTarea}/>
+        
+        <FormularioTarea key={tareaEnEdicion ? tareaEnEdicion.id:"nueva"}
+        onAgregar={agregarTarea}
+        onGuardar={guardarEdicion}
+        tareaEnEdicion={tareaEnEdicion}/>
+
         <ListaTareas tareas={tareas} onCompletar={completarTarea} onEditar={editarTarea} onEliminar={eliminarTarea}/>
         
     </div>
