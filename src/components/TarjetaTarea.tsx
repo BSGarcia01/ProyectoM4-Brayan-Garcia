@@ -12,6 +12,7 @@ export function TarjetaTarea({ tarea, onEliminar, onEditar, onCompletar }: Tarje
     <div>
         <h3>{tarea.titulo}</h3>
         {tarea.completada ? <p>Tarea Completada</p> : <p>Pendiente</p>}
+        <p>{tarea.descripcion}</p>
         <button onClick={()=> onEliminar(tarea.id)}>Eliminar</button>
         <button onClick={()=> onEditar(tarea.id)}>Editar</button>
         <button onClick={()=> onCompletar(tarea.id)}>Completar</button>

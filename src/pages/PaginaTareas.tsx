@@ -38,6 +38,7 @@ return(
         <h1>Gestor de tareas</h1>
         <FormularioTarea onAgregar={agregarTarea}/>
         <ListaTareas tareas={tareas} onCompletar={completarTarea} onEditar={editarTarea} onEliminar={eliminarTarea}/>
+        
     </div>
 )
 }
