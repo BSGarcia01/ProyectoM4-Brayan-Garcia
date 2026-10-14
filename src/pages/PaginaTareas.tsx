@@ -1,13 +1,19 @@
 import { FormularioTarea } from "../components/FormularioTarea";
 import type { Tarea, NuevaTarea } from "../types/Tarea";
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { ListaTareas } from "../components/ListaTareas";
+
 
 
 export function PaginaTareas(){
 
 const [tareas, setTareas] = useState<Tarea[]>([]);
 const [tareaEnEdicion, setTareaEnEdicion] = useState<Tarea| null>(null);
+
+ useEffect(() => {
+  const pendientes = tareas.filter((tarea) => !tarea.completada).length;
+  document.title = `Gestor de tareas (${pendientes} pendientes)`;
+}, [tareas]);
 
 const eliminarTarea = (id : string) => {
     setTareas(tareas.filter((tarea)=>tarea.id !== id));
@@ -39,6 +45,8 @@ const agregarTarea = (datos:NuevaTarea) =>{
     completada: false,
   }
   setTareas([...tareas,nueva]);
+
+ 
 
 };
 
