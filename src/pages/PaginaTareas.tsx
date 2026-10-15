@@ -2,6 +2,7 @@ import { FormularioTarea } from "../components/FormularioTarea";
 import type { Tarea, NuevaTarea } from "../types/Tarea";
 import { useState, useEffect} from "react";
 import { ListaTareas } from "../components/ListaTareas";
+import { Link } from "react-router-dom";
 
 
 
@@ -53,7 +54,7 @@ const agregarTarea = (datos:NuevaTarea) =>{
 return(
     <div>
         <h1>Gestor de tareas</h1>
-        
+        <Link to="/login">Login</Link>
         <FormularioTarea key={tareaEnEdicion ? tareaEnEdicion.id:"nueva"}
         onAgregar={agregarTarea}
         onGuardar={guardarEdicion}
