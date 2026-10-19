@@ -1,10 +1,27 @@
 
-import type { DatosLogin } from "../types/Auth";
+import type { DatosLogin, ErroresLogin } from "../types/Auth";
 import { useState } from "react";
 
 interface LoginFormProps {
   onSubmit: (datos: DatosLogin) => Promise<void>;
 }
+
+
+const validar = (datos: DatosLogin): ErroresLogin => {
+  const errores: ErroresLogin = {};
+
+  if (datos.correo.trim() === "") {
+  errores.correo = "El correo es obligatorio";
+    } else if (!datos.correo.includes("@")) {
+    errores.correo = "El correo debe incluir @";
+    }
+
+  if (datos.clave.length < 7) {
+    errores.clave = "La contraseña debe ser minimo de 7 caracteres";
+  }
+
+  return errores;
+};
 
 export function LoginForm ({onSubmit}:LoginFormProps){
     const [form,setForm] = useState<DatosLogin>({correo: "", clave:""})
@@ -13,12 +30,22 @@ export function LoginForm ({onSubmit}:LoginFormProps){
 
     const [error, setError] = useState("");
 
+    const [errores, setErrores] = useState<ErroresLogin>({});
+
 const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
   setForm({ ...form, [e.target.name]: e.target.value });
 };
 
+
+
 const manejarEnvio = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
+  const erroresEncontrados = validar(form);
+setErrores(erroresEncontrados);
+if (Object.keys(erroresEncontrados).length > 0) {
+
+  return;
+}
   setError("");
   setCargando(true);
   try {
@@ -30,7 +57,8 @@ const manejarEnvio = async (e: React.FormEvent<HTMLFormElement>) => {
   }
 };
 return(
-    <form onSubmit={manejarEnvio}>
+    
+    <form onSubmit={manejarEnvio} noValidate>
         <label htmlFor="correo">Correo</label>
             <input
             id="correo"
@@ -39,6 +67,7 @@ return(
             value={form.correo}
             onChange={manejarCambio}
             autoComplete="email" />
+            {errores.correo && <p role="alert">{errores.correo}</p>}
 
         <label htmlFor="clave">Contraseña</label>
             <input
@@ -48,6 +77,7 @@ return(
             value={form.clave}
             onChange={manejarCambio}
             autoComplete="current-password" />
+            {errores.clave && <p role="alert">{errores.clave}</p>}
 
             <button type="submit" disabled={cargando}>
             {cargando ? "Entrando..." : "Entrar"} </button>
