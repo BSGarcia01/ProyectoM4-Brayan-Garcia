@@ -2,7 +2,7 @@ import { FormularioTarea } from "../components/FormularioTarea";
 import type { Tarea, NuevaTarea } from "../types/Tarea";
 import { useState, useEffect} from "react";
 import { ListaTareas } from "../components/ListaTareas";
-import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 
 
@@ -10,6 +10,7 @@ export function PaginaTareas(){
 
 const [tareas, setTareas] = useState<Tarea[]>([]);
 const [tareaEnEdicion, setTareaEnEdicion] = useState<Tarea| null>(null);
+const {usuario,salir} = useAuth();
 
  useEffect(() => {
   const pendientes = tareas.filter((tarea) => !tarea.completada).length;
@@ -39,22 +40,25 @@ const guardarEdicion = (id: string, datos: NuevaTarea) => {
 };
 
 const agregarTarea = (datos:NuevaTarea) =>{
+   if (!usuario)return;
+
   const nueva:Tarea={
+   
     ...datos,
     id: crypto.randomUUID(),
-    userId: "usuario-prueba",
+    userId: usuario.uid,
     completada: false,
   }
   setTareas([...tareas,nueva]);
 
- 
 
 };
+
 
 return(
     <div>
         <h1>Gestor de tareas</h1>
-        <Link to="/login">Login</Link>
+        <button onClick={salir}>Cerrar sesion</button>
         <FormularioTarea key={tareaEnEdicion ? tareaEnEdicion.id:"nueva"}
         onAgregar={agregarTarea}
         onGuardar={guardarEdicion}

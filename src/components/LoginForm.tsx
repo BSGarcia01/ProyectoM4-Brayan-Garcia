@@ -1,6 +1,7 @@
 
 import type { DatosLogin, ErroresLogin } from "../types/Auth";
 import { useState } from "react";
+import { obtenerMensajeAuth } from "../services/authErrors";
 
 interface LoginFormProps {
   onSubmit: (datos: DatosLogin) => Promise<void>;
@@ -17,7 +18,7 @@ const validar = (datos: DatosLogin): ErroresLogin => {
     }
 
   if (datos.clave.length < 7) {
-    errores.clave = "La contraseña debe ser minimo de 7 caracteres";
+    errores.clave = "La contraseña debe ser minimo 7 caracteres";
   }
 
   return errores;
@@ -41,23 +42,23 @@ const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
 const manejarEnvio = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   const erroresEncontrados = validar(form);
-setErrores(erroresEncontrados);
-if (Object.keys(erroresEncontrados).length > 0) {
+  setErrores(erroresEncontrados);
 
-  return;
+if (Object.keys(erroresEncontrados).length > 0) {
+return;
 }
   setError("");
   setCargando(true);
   try {
     await onSubmit(form);
-  } catch {
-    setError("Correo o contraseña incorrectos");
+  } catch (fallo){
+    setError(obtenerMensajeAuth(fallo));
   } finally {
     setCargando(false);
   }
 };
 return(
-    
+      
     <form onSubmit={manejarEnvio} noValidate>
         <label htmlFor="correo">Correo</label>
             <input
