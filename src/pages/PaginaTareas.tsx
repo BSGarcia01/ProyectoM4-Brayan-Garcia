@@ -3,7 +3,7 @@ import type { Tarea, NuevaTarea } from "../types/Tarea";
 import { useState, useEffect} from "react";
 import { ListaTareas } from "../components/ListaTareas";
 import { useAuth } from "../hooks/useAuth";
-
+import { actualizarTarea,crearTarea,eliminarTarea,escucharTareas } from "../services/tareasService";
 
 
 export function PaginaTareas(){
@@ -11,21 +11,50 @@ export function PaginaTareas(){
 const [tareas, setTareas] = useState<Tarea[]>([]);
 const [tareaEnEdicion, setTareaEnEdicion] = useState<Tarea| null>(null);
 const {usuario,salir} = useAuth();
+const uid = usuario?.uid;
+const[cargando, setCargando] = useState(true);
+const[error, setError] = useState("");
 
- useEffect(() => {
+ 
+useEffect(() => {
+    if (!uid) return;
+    const dejarDeEscuchar = escucharTareas(
+      uid,
+      (lista) => {
+        setTareas(lista);
+        setCargando(false);
+      },
+      () => {
+        setError("No se pudieron cargar las tareas.");
+        setCargando(false);
+      }
+    );
+    return () => dejarDeEscuchar();
+  }, [uid]);
+
+useEffect(() => {
   const pendientes = tareas.filter((tarea) => !tarea.completada).length;
   document.title = `Gestor de tareas (${pendientes} pendientes)`;
 }, [tareas]);
 
-const eliminarTarea = (id : string) => {
-    setTareas(tareas.filter((tarea)=>tarea.id !== id));
+const ejecutar = async (accion: () => Promise<void>) => {
+    try {
+      setError("");
+      await accion();
+    } catch {
+      setError("No se pudo completar la acción. Intenta de nuevo.");
+    }
+  };
+
+const borrarTarea = (id : string) => {
+    void ejecutar(() => eliminarTarea(id));
 };
 
 const completarTarea = (id: string) => {
-  setTareas(tareas.map((tarea) => tarea.id === id ? { ...tarea, completada: true } : tarea
-    )
-  );
-};
+  const tarea = tareas.find((t) => t.id === id);
+    if (!tarea) return;
+    void ejecutar(() => actualizarTarea(id, { completada: !tarea.completada }));
+  };
 
 const editarTarea = (id: string) => {
   const encontrada = tareas.find((tarea)=>tarea.id === id);
@@ -35,24 +64,16 @@ const editarTarea = (id: string) => {
 };
 
 const guardarEdicion = (id: string, datos: NuevaTarea) => {
-  setTareas(tareas.map((tarea) => tarea.id === id ? { ...tarea, ...datos } : tarea ));
-  setTareaEnEdicion(null);
+  void ejecutar(async () => {
+      await actualizarTarea(id, datos);
+      setTareaEnEdicion(null);
+    });
 };
 
 const agregarTarea = (datos:NuevaTarea) =>{
-   if (!usuario)return;
-
-  const nueva:Tarea={
-   
-    ...datos,
-    id: crypto.randomUUID(),
-    userId: usuario.uid,
-    completada: false,
-  }
-  setTareas([...tareas,nueva]);
-
-
-};
+  if (!uid)return;
+  void ejecutar(() => crearTarea(datos, uid));
+  };
 
 
 return(
@@ -64,8 +85,11 @@ return(
         onGuardar={guardarEdicion}
         tareaEnEdicion={tareaEnEdicion}/>
 
-        <ListaTareas tareas={tareas} onCompletar={completarTarea} onEditar={editarTarea} onEliminar={eliminarTarea}/>
-        
+         {error && <p role="alert">{error}</p>} {cargando ? (
+        <p>Cargando tareas...</p>) : (
+
+        <ListaTareas tareas={tareas} onCompletar={completarTarea} onEditar={editarTarea} onEliminar={borrarTarea}/>
+        )}
     </div>
-)
+);
 }
