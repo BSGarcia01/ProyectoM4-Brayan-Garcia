@@ -14,7 +14,7 @@ Aplicación web (SPA) para que los empleados de una pequeña empresa gestionen s
 
 ## Funcionalidades
 
-- Inicio y cierre de sesión con correo y contraseña, con sesión persistente al recargar.
+- Registro, inicio y cierre de sesión con correo y contraseña, con sesión persistente al recargar.
 - Rutas privadas: sin sesión no se pueden ver las tareas.
 - CRUD completo de tareas: crear, listar, editar, eliminar y completar/descompletar.
 - Persistencia en Firestore filtrada por `userId`, con actualización automática de la interfaz (`onSnapshot`).

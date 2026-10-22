@@ -3,8 +3,11 @@ import type { DatosLogin, ErroresLogin } from "../types/Auth";
 import { useState } from "react";
 import { obtenerMensajeAuth } from "../services/authErrors";
 
+
+
 interface LoginFormProps {
   onSubmit: (datos: DatosLogin) => Promise<void>;
+  textoBoton?: string;
 }
 
 
@@ -24,7 +27,7 @@ const validar = (datos: DatosLogin): ErroresLogin => {
   return errores;
 };
 
-export function LoginForm ({onSubmit}:LoginFormProps){
+export function LoginForm ({onSubmit, textoBoton = "Entrar"}:LoginFormProps){
     const [form,setForm] = useState<DatosLogin>({correo: "", clave:""})
 
     const [cargando, setCargando] = useState(false);
@@ -81,7 +84,7 @@ return(
             {errores.clave && <p role="alert">{errores.clave}</p>}
 
             <button type="submit" disabled={cargando}>
-            {cargando ? "Entrando..." : "Entrar"} </button>
+            {cargando ? "Enviando..." : textoBoton} </button>
 
             {error && <p role="alert">{error}</p>}
             
