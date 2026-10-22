@@ -1,5 +1,6 @@
 import type { Tarea } from "../types/Tarea";
 
+
 interface TarjetaTareaProps {
   tarea: Tarea;
   onEliminar: (id: string) => void;
