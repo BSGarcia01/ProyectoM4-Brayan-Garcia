@@ -4,6 +4,7 @@ import { useState, useEffect} from "react";
 import { ListaTareas } from "../components/ListaTareas";
 import { useAuth } from "../hooks/useAuth";
 import { actualizarTarea,crearTarea,eliminarTarea,escucharTareas } from "../services/tareasService";
+import { enviarResumen } from "../services/emailService";
 
 
 export function PaginaTareas(){
@@ -14,6 +15,8 @@ const {usuario,salir} = useAuth();
 const uid = usuario?.uid;
 const[cargando, setCargando] = useState(true);
 const[error, setError] = useState("");
+const [enviando, setEnviando] = useState(false);
+const [aviso, setAviso] = useState("");
 
  
 useEffect(() => {
@@ -75,18 +78,40 @@ const agregarTarea = (datos:NuevaTarea) =>{
   void ejecutar(() => crearTarea(datos, uid));
   };
 
+  const manejarEnvioResumen = async () => {
+  setEnviando(true);
+  setAviso("");
+  try {
+    await enviarResumen(tareas);
+    setAviso("Resumen enviado a tu correo.");
+  } catch {
+    setAviso("No se pudo enviar el resumen. Intenta de nuevo.");
+  } finally {
+    setEnviando(false);
+  }
+};
 
 return(
     <div>
         <h1>Gestor de tareas</h1>
         <button onClick={salir}>Cerrar sesion</button>
+
+        <button onClick={manejarEnvioResumen} disabled={enviando || tareas.length === 0}>
+        {enviando ? "Enviando..." : "Enviar resumen"}
+        </button>
+        {aviso && <p role="alert">{aviso}</p>}
+
         <FormularioTarea key={tareaEnEdicion ? tareaEnEdicion.id:"nueva"}
         onAgregar={agregarTarea}
         onGuardar={guardarEdicion}
         tareaEnEdicion={tareaEnEdicion}/>
 
+        {!cargando && tareas.length === 0 && <p>No tienes tareas todavía.</p>}
+
          {error && <p role="alert">{error}</p>} {cargando ? (
         <p>Cargando tareas...</p>) : (
+
+          
 
         <ListaTareas tareas={tareas} onCompletar={completarTarea} onEditar={editarTarea} onEliminar={borrarTarea}/>
         )}
